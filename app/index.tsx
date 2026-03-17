@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { Text, View } from "react-native";
 import CameraButton from "../components/CameraButton";
 
 export default function Index() {
@@ -10,7 +10,7 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      
+      <Text>Vision App</Text>
       <CameraButton />
     </View>
   );

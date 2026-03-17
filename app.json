@@ -40,7 +40,19 @@
           }
         }
       ],
-      "react-native-vision-camera"
+      [
+        "expo-camera", {
+        "cameraPermission": "Allow $(APPNAME) to access your camera."
+      }],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
+          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
+          "audioPermission": false,
+          "isAccessMediaLocationEnabled": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
