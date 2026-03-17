@@ -1,4 +1,9 @@
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import CameraButton from "../components/CameraButton";
+
+function onPressLearnMore() {
+  console.log("Learn more button pressed");
+}
 
 export default function Index() {
   return (
@@ -9,7 +14,8 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <Text>Vision App</Text>
+      
+      <CameraButton />
     </View>
   );
 }
