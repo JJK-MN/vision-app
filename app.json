@@ -38,7 +38,11 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      [
+        "expo-camera", {
+        "cameraPermission": "Allow $(APPNAME) to access your camera."
+      }]
     ],
     "experiments": {
       "typedRoutes": true,
