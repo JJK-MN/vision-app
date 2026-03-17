@@ -14,7 +14,7 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      
+      <Text>Vision App</Text>
       <CameraButton />
     </View>
   );
