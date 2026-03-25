@@ -1,46 +1,13 @@
+import { BlurView } from 'expo-blur';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as React from 'react';
-import { Alert, Animated, Dimensions, Easing, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Animated, Dimensions, Pressable, StyleSheet, View } from 'react-native';
 
 export default function AutoCaptureButton() {
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const cameraRef = React.useRef<CameraView>(null);
   const [cameraReady, setCameraReady] = React.useState(false);
   const [photoUri, setPhotoUri] = React.useState<string | null>(null);
-
-  // 12 bars: 6 big, 6 small alternating
-  const animations = React.useRef(Array.from({ length: 12 }).map(() => new Animated.Value(0))).current;
-  const rotationAnim = React.useRef(new Animated.Value(0)).current;
-
-  React.useEffect(() => {
-    const anims = animations.map((anim, index) => {
-      return Animated.loop(
-        Animated.sequence([
-          Animated.timing(anim, {
-            toValue: 1,
-            duration: 600,
-            delay: index * 100, // sine wave staggered effect
-            useNativeDriver: true,
-          }),
-          Animated.timing(anim, {
-            toValue: 0,
-            duration: 600,
-            useNativeDriver: true,
-          }),
-        ])
-      );
-    });
-    anims.forEach((a) => a.start());
-
-    Animated.loop(
-      Animated.timing(rotationAnim, {
-        toValue: 1,
-        duration: 12000, // Smooth 4-second full rotation
-        easing: Easing.linear, // Ensure it's a constant speed, not speeding up and slowing down
-        useNativeDriver: true,
-      })
-    ).start();
-  }, [animations, rotationAnim]);
 
   async function handleCapture() {
     if (!cameraPermission?.granted) {
@@ -67,49 +34,52 @@ export default function AutoCaptureButton() {
   }
 
   const renderBars = () => {
-    return animations.map((anim, index) => {
-      const isBig = index % 2 === 0;
-      const angle = index * 30; // 360 / 12 = 30 degrees each
-      
-      const scaleY = anim.interpolate({
-        inputRange: [0, 1],
-        outputRange: isBig ? [2, 2.5] : [2, 2.75],
-      });
+    const bars = [];
+    const barCount = 16; // Match the 16 bars in the image
+    const screenWidth = Dimensions.get('window').width;
+    
+    // Dynamic sizing based on screen width
+    const centerRingSize = screenWidth * 0.12; 
+    const innerGap = screenWidth * 0.035; 
+    const innerRadius = (centerRingSize / 2) + innerGap;
+    const barWidth = screenWidth * 0.018;
 
-      const barHeight = isBig ? 24 : 16;
-      const halfHeight = barHeight / 2 + Dimensions.get('window').width * 0.05;
+    for (let i = 0; i < barCount; i++) {
+      const angle = (Math.PI * 2 * i) / barCount;
+      const angleDeg = (angle * 180) / Math.PI;
 
-      return (
+      const isBig = i % 2 === 0;
+      const height = isBig ? screenWidth * 0.1 : screenWidth * 0.05;
+
+      // Add half height to innerRadius so the inside edges form a perfect circle 
+      const distance = innerRadius + (height / 2);
+
+      const x = Math.cos(angle) * distance;
+      const y = Math.sin(angle) * distance;
+
+      bars.push(
         <View
-          key={index}
+          key={i}
           style={[
-            styles.barContainer,
-            { transform: [{ rotate: `${angle}deg` }] },
+            styles.bar,
+            { 
+              width: barWidth,
+              height: height,
+              borderRadius: barWidth / 2,
+              transform: [
+                { translateX: x },
+                { translateY: y },
+                // rotate an extra 90deg to keep length pointing radially outward
+                { rotate: `${angleDeg + 90}deg` }, 
+              ] 
+            },
           ]}
-        >
-          <Animated.View
-            style={[
-              styles.bar,
-              isBig ? styles.barBig : styles.barSmall,
-              {
-                // This anchoring technique makes it scale from the bottom outwards
-                transform: [
-                  { translateY: halfHeight },
-                  { scaleY },
-                  { translateY: -halfHeight }
-                ],
-              },
-            ]}
-          />
-        </View>
+        />
       );
-    });
-  };
+    }
 
-  const spin = rotationAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
+    return bars;
+  }
 
   return (
     <>
@@ -119,15 +89,28 @@ export default function AutoCaptureButton() {
         style={styles.hiddenCamera}
         facing="back"
         onCameraReady={() => setCameraReady(true)}
-      />
+      >
+        
+      </CameraView>
 
       {/* Capture button with visualizer */}
-      <Pressable style={styles.button} onPress={handleCapture}>
-        <Animated.View style={[styles.visualizerRing, { transform: [{ rotate: spin }] }]}>
-          {renderBars()}
-        </Animated.View>
-        <View style={styles.centerDot} />
-      </Pressable>
+      <View style={styles.buttonWrapper}>
+        {/* Blur layer behind button content */}
+        <BlurView
+          style={StyleSheet.absoluteFill}
+          intensity={100}
+          tint="dark"
+          experimentalBlurMethod = "dimezisBlurView"
+        />
+
+        {/* Button content on top */}
+        <Pressable style={styles.button} onPress={handleCapture}>
+          <Animated.View style={styles.visualizerRing}>
+            {renderBars()}
+          </Animated.View>
+          <View style={styles.centerDot} />
+        </Pressable>
+      </View>
     </>
   );
 }
@@ -136,45 +119,47 @@ const styles = StyleSheet.create({
   hiddenCamera: {
     ...StyleSheet.absoluteFillObject,
   },
-  button: {
-    width: Dimensions.get('window').width * 0.6,
-    height: Dimensions.get('window').width * 0.6,
-    backgroundColor: 'rgba(255, 255, 255, 0)',
+  visualizerRing: {
+    ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  visualizerRing: {
-    position: 'absolute',
-    width: 60,
-    height: 60,
+  button: {
+    width: Dimensions.get('window').width * 0.55,
+    height: Dimensions.get('window').width * 0.55,
     justifyContent: 'center',
     alignItems: 'center',
+    display: 'flex',
+  },
+  buttonWrapper: {
+    width: Dimensions.get('window').width * 0.55,
+    height: Dimensions.get('window').width * 0.55,
+    borderRadius: Dimensions.get('window').width * 0.275, // makes it circular
+    overflow: 'hidden', // ← clips BlurView to the circle shape
   },
   centerDot: {
-    width: Dimensions.get('window').width * 0.05,
-    height: Dimensions.get('window').width * 0.05,
-    borderRadius: Dimensions.get('window').width * 0.025,
-    backgroundColor: 'white',
-    zIndex: 10,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  barContainer: {
     position: 'absolute',
-    width: Dimensions.get('window').width * 0.05,
-    // total height controls how far from the center the bars start
-    height: Dimensions.get('window').width * 0.3,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+
+    width: Dimensions.get('window').width * 0.12,
+    height: Dimensions.get('window').width * 0.12,
+
+    borderRadius: Dimensions.get('window').width * 0.06,
+    borderWidth: Dimensions.get('window').width * 0.018,
+    borderColor: '#E87A7D',
+    backgroundColor: 'transparent',
+    zIndex: 10,
+  },
+  backgroundBlur: {
+    ...StyleSheet.absoluteFillObject,
+    width: Dimensions.get('window').width * 0.55,
+    height: Dimensions.get('window').width * 0.55,
   },
   bar: {
+    position: 'absolute',
+    backgroundColor: '#E87A7D',
     width: Dimensions.get('window').width * 0.015,
-    backgroundColor: 'white',
     borderRadius: Dimensions.get('window').width * 0.025,
-    opacity: 0.8,
+    opacity: 1,
   },
   barBig: {
     height: Dimensions.get('window').width * 0.08,
