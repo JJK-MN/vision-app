@@ -26,8 +26,10 @@ export default function AutoCaptureButton() {
         skipProcessing: true,
       });
 
-      setPhotoUri(photo.uri);
-      console.log('Captured:', photo.uri);
+      if (photo) {
+        setPhotoUri(photo.uri);
+        console.log('Captured:', photo.uri);
+      }
     } catch (e) {
       console.error('Capture failed', e);
     }
