@@ -1,40 +1,9 @@
 import { BlurView } from 'expo-blur';
-import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as React from 'react';
-import { Alert, Animated, Dimensions, Pressable, StyleSheet, View } from 'react-native';
+import { Animated, Dimensions, Pressable, StyleSheet, View } from 'react-native';
 
-export default function AutoCaptureButton() {
-  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
-  const cameraRef = React.useRef<CameraView>(null);
-  const [cameraReady, setCameraReady] = React.useState(false);
-  const [photoUri, setPhotoUri] = React.useState<string | null>(null);
-
-  async function handleCapture() {
-    if (!cameraPermission?.granted) {
-      const res = await requestCameraPermission();
-      if (!res.granted) return;
-    }
-
-    if (!cameraReady || !cameraRef.current) {
-      Alert.alert('Camera not ready yet, try again.');
-      return;
-    }
-
-    try {
-      const photo = await cameraRef.current.takePictureAsync({
-        quality: 0.85,
-        skipProcessing: true,
-      });
-
-      if (photo) {
-        setPhotoUri(photo.uri);
-        console.log('Captured:', photo.uri);
-      }
-    } catch (e) {
-      console.error('Capture failed', e);
-    }
-  }
-
+export default function AutoCaptureButton({ onPressedCallback }: { onPressedCallback: () => void }) {
+  
   const renderBars = () => {
     const bars = [];
     const barCount = 16; // Match the 16 bars in the image
@@ -84,42 +53,34 @@ export default function AutoCaptureButton() {
   }
 
   return (
-    <>
-      {/* Hidden background camera */}
-      <CameraView
-        ref={cameraRef}
-        style={styles.hiddenCamera}
-        facing="back"
-        onCameraReady={() => setCameraReady(true)}
-      >
-        
-      </CameraView>
+    <View style={styles.container}>
 
       {/* Capture button with visualizer */}
       <View style={styles.buttonWrapper}>
         {/* Blur layer behind button content */}
         <BlurView
           style={StyleSheet.absoluteFill}
-          intensity={100}
-          tint="dark"
-          experimentalBlurMethod = "dimezisBlurView"
+          intensity={80}
+          tint="light"
         />
 
         {/* Button content on top */}
-        <Pressable style={styles.button} onPress={handleCapture}>
+        <Pressable style={styles.button} onPress={onPressedCallback}>
           <Animated.View style={styles.visualizerRing}>
             {renderBars()}
           </Animated.View>
           <View style={styles.centerDot} />
         </Pressable>
       </View>
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  hiddenCamera: {
+  container: {
     ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   visualizerRing: {
     ...StyleSheet.absoluteFillObject,
