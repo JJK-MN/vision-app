@@ -1,27 +1,35 @@
 import { useRouter } from 'expo-router';
+import * as React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 
 export default function SettingsScreen() {
   const router = useRouter();
 
+  const navigateHome = React.useCallback(() => {
+    router.push('/');
+  }, [router]);
+
   const swipeLeft = Gesture.Pan()
-    .runOnJS(true)
     .minDistance(30)
     .activeOffsetX([-20, 20])
     .onEnd((e) => {
       // Swiping right or left to go to index
       if (Math.abs(e.translationX) > 50 && Math.abs(e.translationY) < 80) {
-        router.push({ pathname: "/" });
+        // runOnJS will safely call the JS navigation function from the gesture worklet
+        runOnJS(navigateHome)();
       }
     });
 
   return (
-    <GestureDetector gesture={swipeLeft}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Settings</Text>
-      </View>
-    </GestureDetector>
+    <GestureHandlerRootView>
+      <GestureDetector gesture={swipeLeft}>
+        <View style={styles.container}>
+          <Text style={styles.title}>Settings</Text>
+        </View>
+      </GestureDetector>
+    </GestureHandlerRootView>
   );
 }
 

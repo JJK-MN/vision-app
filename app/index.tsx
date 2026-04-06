@@ -1,15 +1,35 @@
 import { CameraView, useCameraPermissions } from "expo-camera";
+import { useRouter } from 'expo-router';
 import React from "react";
 import { Alert, StyleSheet, View } from "react-native";
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import { runOnJS } from "react-native-worklets";
 import CameraButton from "../components/CameraButton";
 
-
 export default function Index() {
+
+  const router = useRouter();
 
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const cameraRef = React.useRef<CameraView>(null);
   const [cameraReady, setCameraReady] = React.useState(false);
   const [photoUri, setPhotoUri] = React.useState<string | null>(null);
+
+  const navigateSettings = React.useCallback(() => {
+      router.push('/settings');
+    }, [router]);
+
+  // Use the new Gesture API: create a pan gesture and handle `onEnd` to detect left swipe
+  const panGesture = Gesture.Pan().onEnd((event: any) => {
+    const { translationX, translationY } = event;
+    const HORIZONTAL_SWIPE_THRESHOLD = -120; // px to the left
+    const MAX_VERTICAL_DRIFT = 80; // allow some vertical movement
+
+    if (translationX < HORIZONTAL_SWIPE_THRESHOLD && Math.abs(translationY) < MAX_VERTICAL_DRIFT) {
+      console.log('Swiped left, navigating to settings');
+      runOnJS(navigateSettings)();
+    }
+  });
 
   async function handleCapture() {
       if (!cameraPermission?.granted) {
@@ -38,22 +58,26 @@ export default function Index() {
     }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <CameraView
-              ref={cameraRef}
-              style={styles.hiddenCamera}
-              facing="back"
-              onCameraReady={() => setCameraReady(true)}
-      />
-      
-      <CameraButton onPressedCallback={handleCapture} />
-    </View>
+    <GestureHandlerRootView>
+      <GestureDetector gesture={panGesture}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <CameraView
+                  ref={cameraRef}
+                  style={styles.hiddenCamera}
+                  facing="back"
+                  onCameraReady={() => setCameraReady(true)}
+          />
+          
+          <CameraButton onPressedCallback={handleCapture} />
+        </View>
+      </GestureDetector>
+    </GestureHandlerRootView>
   );
 }
 
