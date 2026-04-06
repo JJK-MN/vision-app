@@ -2,7 +2,12 @@ import { BlurView } from 'expo-blur';
 import * as React from 'react';
 import { Animated, Dimensions, Pressable, StyleSheet, View } from 'react-native';
 
-export default function AutoCaptureButton({ onPressedCallback }: { onPressedCallback: () => void }) {
+export default function AutoCaptureButton({ 
+  onPressedCallback,
+}: { 
+  onPressedCallback: () => void,
+}) {
+
   
   const renderBars = () => {
     const bars = [];
