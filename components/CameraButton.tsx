@@ -1,8 +1,25 @@
 import { BlurView } from 'expo-blur';
 import * as React from 'react';
 import { Animated, Dimensions, Pressable, StyleSheet, View } from 'react-native';
+import { Gesture } from 'react-native-gesture-handler';
 
-export default function AutoCaptureButton({ onPressedCallback }: { onPressedCallback: () => void }) {
+export default function AutoCaptureButton({ 
+  onPressedCallback,
+  onSwipeLeft  // add this
+}: { 
+  onPressedCallback: () => void,
+  onSwipeLeft?: () => void  // optional
+}) {
+
+  const swipeLeft = Gesture.Pan()
+  .runOnJS(true)
+  .minDistance(30)
+  .activeOffsetX([-20, 20])
+  .onEnd((e) => {
+    if (e.translationX < -50 && Math.abs(e.translationY) < 80) {
+      onSwipeLeft?.();
+    }
+  });
   
   const renderBars = () => {
     const bars = [];
