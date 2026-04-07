@@ -1,80 +1,145 @@
 import { BlurView } from 'expo-blur';
 import * as React from 'react';
-import { Animated, Dimensions, Pressable, StyleSheet, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Animated, Dimensions, Easing, Pressable, StyleSheet, View } from 'react-native';
 
-export default function AutoCaptureButton({ 
-  onPressedCallback,
-}: { 
-  onPressedCallback: () => void,
-}) {
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+export default function AutoCaptureButton({ onPressedCallback }: { onPressedCallback: () => void }) {
+  const barCount = 16;
   
+  // Create animated values (0 to 1)
+  const barAnimations = useRef(
+    Array.from({ length: barCount }, () => new Animated.Value(0))
+  ).current;
+
+  useEffect(() => {
+    const animations = barAnimations.map((anim, i) => {
+      const isEven = i % 2 === 0;
+      const duration = isEven ? 800 : 600; // Different speeds for even/odd bars
+      // Staggered start delay
+      const delay = 0;
+      
+      return Animated.sequence([
+        Animated.delay(delay),
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(anim, {
+              toValue: 1,
+              duration: duration,
+              easing: Easing.inOut(Easing.sin),
+              useNativeDriver: true,
+            }),
+            Animated.timing(anim, {
+              toValue: 0,
+              duration: duration,
+              easing: Easing.inOut(Easing.sin),
+              useNativeDriver: true,
+            }),
+          ])
+        ),
+      ]);
+    });
+
+    Animated.parallel(animations).start();
+  }, []);
+
   const renderBars = () => {
-    const bars = [];
-    const barCount = 16; // Match the 16 bars in the image
-    const screenWidth = Dimensions.get('window').width;
-    
-    // Dynamic sizing based on screen width
-    const centerRingSize = screenWidth * 0.12; 
-    const innerGap = screenWidth * 0.035; 
-    const innerRadius = (centerRingSize / 2) + innerGap;
-    const barWidth = screenWidth * 0.018;
+    const centerRingSize = SCREEN_WIDTH * 0.12;
+    const innerGap = SCREEN_WIDTH * 0.035;
+    const innerRadius = centerRingSize / 2 + innerGap;
+    const barWidth = SCREEN_WIDTH * 0.018;
 
-    for (let i = 0; i < barCount; i++) {
-      const angle = (Math.PI * 2 * i) / barCount;
-      const angleDeg = (angle * 180) / Math.PI;
+    return barAnimations.map((anim, i) => {
+      const isEven = i % 2 === 0;
+      const angle = (i * 360) / barCount;
+      
+      // Base heights
+      const baseHeight = isEven ? SCREEN_WIDTH * 0.08 : SCREEN_WIDTH * 0.05;
+      const growthAmount = baseHeight * 0.6; // How much it grows
 
-      const isBig = i % 2 === 0;
-      const height = isBig ? screenWidth * 0.1 : screenWidth * 0.05;
+      // Interpolate scale and translation
+      // By moving the anchor point via translateY, we simulate growth from center
+      const scaleY = anim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [1, 1.5],
+      });
 
-      // Add half height to innerRadius so the inside edges form a perfect circle 
-      const distance = innerRadius + (height / 2);
+      const translateY = anim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [innerRadius + baseHeight / 2, innerRadius + (baseHeight * 1.5) / 2],
+      });
 
-      const x = Math.cos(angle) * distance;
-      const y = Math.sin(angle) * distance;
-
-      bars.push(
-        <View
+      return (
+        <Animated.View
           key={i}
           style={[
             styles.bar,
-            { 
+            {
               width: barWidth,
-              height: height,
+              height: baseHeight,
               borderRadius: barWidth / 2,
               transform: [
-                { translateX: x },
-                { translateY: y },
-                // rotate an extra 90deg to keep length pointing radially outward
-                { rotate: `${angleDeg + 90}deg` }, 
-              ] 
+                { rotate: `${angle}deg` },
+                { translateY: translateY },
+                { scaleY: scaleY },
+              ],
             },
           ]}
         />
       );
-    }
+    });
+  };
 
-    return bars;
+
+  const dotAnimation = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const duration = 1000;
+
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(dotAnimation, {
+          toValue: 1,
+          duration: duration,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(dotAnimation, {
+          toValue: 0,
+          duration: duration,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  const renderCenterDot = () => {
+
+    const scale = dotAnimation.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0.85, 1],
+    });
+
+    return (
+      <Animated.View style={[
+        styles.centerDot,
+        {transform: [{ scale: scale }]},
+      ]}>
+      </Animated.View>
+    );
   }
 
   return (
     <View style={styles.container}>
-
-      {/* Capture button with visualizer */}
       <View style={styles.buttonWrapper}>
-        {/* Blur layer behind button content */}
-        <BlurView
-          style={StyleSheet.absoluteFill}
-          intensity={80}
-          tint="light"
-        />
-
-        {/* Button content on top */}
+        <BlurView style={StyleSheet.absoluteFill} intensity={80} tint="light" />
         <Pressable style={styles.button} onPress={onPressedCallback}>
-          <Animated.View style={styles.visualizerRing}>
+          <View style={styles.visualizerRing}>
             {renderBars()}
-          </Animated.View>
-          <View style={styles.centerDot} />
+          </View>
+          {renderCenterDot()}
         </Pressable>
       </View>
     </View>
@@ -93,46 +158,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   button: {
-    width: Dimensions.get('window').width * 0.55,
-    height: Dimensions.get('window').width * 0.55,
+    width: SCREEN_WIDTH * 0.55,
+    height: SCREEN_WIDTH * 0.55,
     justifyContent: 'center',
     alignItems: 'center',
-    display: 'flex',
   },
   buttonWrapper: {
-    width: Dimensions.get('window').width * 0.55,
-    height: Dimensions.get('window').width * 0.55,
-    borderRadius: Dimensions.get('window').width * 0.275, // makes it circular
-    overflow: 'hidden', // ← clips BlurView to the circle shape
+    width: SCREEN_WIDTH * 0.55,
+    height: SCREEN_WIDTH * 0.55,
+    borderRadius: SCREEN_WIDTH * 0.275,
+    overflow: 'hidden',
   },
   centerDot: {
     position: 'absolute',
-
-    width: Dimensions.get('window').width * 0.12,
-    height: Dimensions.get('window').width * 0.12,
-
-    borderRadius: Dimensions.get('window').width * 0.06,
-    borderWidth: Dimensions.get('window').width * 0.018,
+    width: SCREEN_WIDTH * 0.12,
+    height: SCREEN_WIDTH * 0.12,
+    borderRadius: SCREEN_WIDTH * 0.06,
+    borderWidth: SCREEN_WIDTH * 0.018,
     borderColor: '#E87A7D',
     backgroundColor: 'transparent',
     zIndex: 10,
   },
-  backgroundBlur: {
-    ...StyleSheet.absoluteFillObject,
-    width: Dimensions.get('window').width * 0.55,
-    height: Dimensions.get('window').width * 0.55,
-  },
   bar: {
     position: 'absolute',
     backgroundColor: '#E87A7D',
-    width: Dimensions.get('window').width * 0.015,
-    borderRadius: Dimensions.get('window').width * 0.025,
-    opacity: 1,
-  },
-  barBig: {
-    height: Dimensions.get('window').width * 0.08,
-  },
-  barSmall: {
-    height: Dimensions.get('window').width * 0.05,
   },
 });
