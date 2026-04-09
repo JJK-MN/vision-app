@@ -16,6 +16,7 @@ export default function SettingsScreen() {
     .activeOffsetX([-20, 20])
     .onEnd((e) => {
       if (e.translationX > 50 && Math.abs(e.translationY) < 80) {
+        console.log('Swiped right, going back');
         router.push('/');
       }
     });
@@ -81,6 +82,8 @@ export default function SettingsScreen() {
           <MyButton label="Lorem Ipsum" onPress={() => console.log('pressed')} />
           <MyButton label="Lorem Ipsum" onPress={() => console.log('pressed')} />
           <MyButton label="Lorem Ipsum" onPress={() => console.log('pressed')} />
+          <MyButton label="Lorem Ipsum" onPress={() => console.log('pressed')} />
+          <MyButton label="Lorem Ipsum" onPress={() => console.log('pressed')} />
 
           {/* App Preferences Section */}
           <Text style={styles.sectionLabel}>App Preferences</Text>
@@ -88,7 +91,10 @@ export default function SettingsScreen() {
           <MyButton label="Lorem Ipsum" onPress={() => console.log('pressed')} />
           <MyButton label="Lorem Ipsum" onPress={() => console.log('pressed')} />
           <MyButton label="Lorem Ipsum" onPress={() => console.log('pressed')} />
+          <MyButton label="Lorem Ipsum" onPress={() => console.log('pressed')} />
+          <MyButton label="Lorem Ipsum" onPress={() => console.log('pressed')} />
 
+          <View style={styles.footer} />
         </ScrollView>
       </View>
     </GestureDetector>
@@ -111,7 +117,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#e2dedeff',
     borderRadius: 50,
     paddingHorizontal: 16,
-    paddingVertical: 10,
     height: 50,
   },
   searchIcon: {
@@ -153,5 +158,8 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     paddingRight: 10,
     transform: [{ translateY: 5 }],
+  },
+  footer: {
+    height: 60,
   },
 });

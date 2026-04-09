@@ -1,5 +1,8 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+
+const premiumIcon = require('../assets/images/premiumIcon.png');
+const userIcon = require('../assets/images/userIcon.png');
 
 type Props = {
   label: string;
@@ -14,15 +17,20 @@ export default function MyButton({ label, description, descriptionElement, varia
   if (variant === 'premium') {
     return (
       <Pressable style={styles.premiumButton} onPress={onPress}>
-        <Text style={styles.premiumButtonMainText}>{label}</Text>
-        {descriptionElement && (
-          <Text style={styles.premiumButtonDescriptionText}>
-            {descriptionElement}
-          </Text>
-        )}
-        {!descriptionElement && description && (
-          <Text style={styles.premiumButtonDescriptionText}>{description}</Text>
-        )}
+        <View style={styles.premiumIconContainer}>
+            <Image source={premiumIcon} style={styles.premiumIcon} />
+        </View>
+        <View style={styles.premiumTextContainer}>
+          <Text style={styles.premiumButtonMainText}>{label}</Text>
+          {descriptionElement && (
+            <Text style={styles.premiumButtonDescriptionText}>
+              {descriptionElement}
+            </Text>
+          )}
+          {!descriptionElement && description && (
+            <Text style={styles.premiumButtonDescriptionText}>{description}</Text>
+          )}
+        </View>
       </Pressable>
     );
   }
@@ -30,15 +38,20 @@ export default function MyButton({ label, description, descriptionElement, varia
   if (variant === 'user') {
     return (
       <Pressable style={styles.userButton} onPress={onPress}>
-        <Text style={styles.userButtonMainText}>{label}</Text>
-        {description && (
-          <Text style={styles.userButtonDescriptionText}>{description}</Text>
-        )}
+        <View style={styles.userIconContainer}>
+          <Image source={userIcon} style={styles.userIcon} />
+        </View>
+        <View style={styles.userTextContainer}>
+          <Text style={styles.userButtonMainText}>{label}</Text>
+          {description && (
+            <Text style={styles.userButtonDescriptionText}>{description}</Text>
+          )}
+        </View>
       </Pressable>
     );
   }
 
-  // default: 'button'
+  // ✅ default: 'button'
   return (
     <Pressable style={styles.button} onPress={onPress}>
       <Text style={styles.buttonText}>{label}</Text>
@@ -59,6 +72,11 @@ const styles = StyleSheet.create({
     height: 50,
     alignSelf: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   buttonText: {
     color: '#000',
@@ -71,12 +89,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#272222ff',
     outlineColor: '#000',
     outlineWidth: 2,
-    padding: 7,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 6,
     borderRadius: 10,
     marginTop: 9,
     width: '95%',
     alignSelf: 'center',
-    justifyContent: 'center',
     minHeight: 65,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -84,19 +103,38 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  premiumIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    marginRight: 20,
+    transform: [{ translateX: 10 }],
+  },
+  premiumIconContainer: {
+    backgroundColor: '#000',
+    width: 50,
+    height: 50,
+    borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+    transform: [{ translateX: 10 }],
+  },
+  premiumTextContainer: {
+    flex: 1,
+  },
   premiumButtonMainText: {
     color: '#fff',
     fontWeight: '600',
     fontSize: 16,
-    transform: [{ translateX: 60 }],
+    transform: [{ translateX: 10 }],
   },
   premiumButtonDescriptionText: {
     color: '#9e9a9aff',
     fontWeight: '400',
     fontSize: 14,
-    textAlign: 'left',
-    width: '80%',
-    transform: [{ translateX: 60 }],
+    marginTop: 4,
+    transform: [{ translateX: 10 }],
   },
 
   // User button
@@ -104,12 +142,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     outlineColor: '#B1B1B1',
     outlineWidth: 2,
-    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
     borderRadius: 10,
     marginTop: 9,
     width: '95%',
     alignSelf: 'center',
-    justifyContent: 'center',
     minHeight: 65,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -117,16 +156,36 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  userIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
+    transform: [{ translateX: 7 }],
+  },
+  userIconContainer: {
+    backgroundColor: '#D9D9D9',
+    width: 50,
+    height: 50,
+    borderRadius: 15,
+    marginRight: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    transform: [{ translateX: 5 }],
+  },
+  userTextContainer: {
+    flex: 1,
+  },
   userButtonMainText: {
     color: '#000',
     fontWeight: '600',
     fontSize: 16,
-    transform: [{ translateX: 60 }],
+    transform: [{ translateX: 5 }],
   },
   userButtonDescriptionText: {
     color: '#3d3a3aff',
     fontWeight: '400',
     fontSize: 14,
-    transform: [{ translateX: 60 }],
+    transform: [{ translateX: 5 }],
   },
 });
