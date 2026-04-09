@@ -1,5 +1,6 @@
+import * as SecureStore from 'expo-secure-store';
 import React from "react";
-import { Button, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Button, Platform, StyleSheet, Text, TextInput, View } from "react-native";
 
 export default function login() {
 
@@ -7,18 +8,24 @@ export default function login() {
     const [password, setPassword] = React.useState("");
 
     const login = async () => {
-        const user = userName;
-        const pass = password;
-
-        // Send credentials to server and await response
-        const token = await sendLoginRequest();
+        try {
+            const token = await sendLoginRequest();
+            await SecureStore.setItemAsync('username', userName);
+            await SecureStore.setItemAsync('password', password);
+            await SecureStore.setItemAsync('token', token['token']);
+            // TODO: handle token (store, navigate, etc.)
+        } catch (err: any) {
+            console.error('Login error', err);
+            Alert.alert('Login failed', err?.message || 'Network request failed');
+        }
     };
 
     const sendLoginRequest = async () => {
-        const response = await fetch("http://localhost:5000/login", {
+        const baseUrl = Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://127.0.0.1:5000';
+        const response = await fetch(`${baseUrl}/login`, {
             method: "POST",
             headers: {
-            "Content-Type": "application/json",
+                "Content-Type": "application/json",
             },
             body: JSON.stringify({
                 username: userName,
@@ -26,8 +33,14 @@ export default function login() {
             }),
         });
 
+        if (!response.ok) {
+            const text = await response.text().catch(() => '');
+            throw new Error(`Server error: ${response.status} ${text}`);
+        }
+
         const data = await response.json();
         console.log(data);
+        return data;
     };
 
     return (

@@ -13,7 +13,7 @@ export default function loading() {
     const processLoading = React.useCallback(() => {
         console.log("First communicating with server...");
 
-        const userName = SecureStore.getItemAsync('userName').then((name) => {
+        const userName = SecureStore.getItemAsync('username').then((name) => {
             if (name) {
                 console.log("User name found:", name);
             } else {
@@ -30,6 +30,16 @@ export default function loading() {
                 router.push('/login');
             }
         });
+
+        // Wait until root layout is ready and text ref is set before routing to main
+        if (text.current) {
+            Promise.all([userName, password]).then(() => {
+                console.log("Routing to main screen.");
+                router.push('/main');
+            });
+        } else {
+            console.warn("Text ref not set yet, cannot route to main screen.");
+        }
 
 
     }, []);
