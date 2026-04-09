@@ -1,88 +1,71 @@
-import { CameraView, useCameraPermissions } from "expo-camera";
+
 import { useRouter } from 'expo-router';
-import React from "react";
-import { Alert, StyleSheet, View } from "react-native";
-import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
-import { runOnJS } from "react-native-worklets";
+import * as SecureStore from 'expo-secure-store';
+import React, { useEffect } from "react";
+import { StyleSheet, Text, View } from "react-native";
 import CameraButton from "../components/CameraButton";
 
-export default function Index() {
+export default function loading() {
 
-  const router = useRouter();
+    const text = React.useRef<Text>(null);
+    const router = useRouter();
 
-  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
-  const cameraRef = React.useRef<CameraView>(null);
-  const [cameraReady, setCameraReady] = React.useState(false);
-  const [photoUri, setPhotoUri] = React.useState<string | null>(null);
+    const processLoading = React.useCallback(() => {
+        console.log("First communicating with server...");
 
-  const navigateSettings = React.useCallback(() => {
-      router.push('/settings');
-    }, [router]);
-
-  // Use the new Gesture API: create a pan gesture and handle `onEnd` to detect left swipe
-  const panGesture = Gesture.Pan().onEnd((event: any) => {
-    const { translationX, translationY } = event;
-    const HORIZONTAL_SWIPE_THRESHOLD = -120; // px to the left
-    const MAX_VERTICAL_DRIFT = 80; // allow some vertical movement
-
-    if (translationX < HORIZONTAL_SWIPE_THRESHOLD && Math.abs(translationY) < MAX_VERTICAL_DRIFT) {
-      console.log('Swiped left, navigating to settings');
-      runOnJS(navigateSettings)();
-    }
-  });
-
-  async function handleCapture() {
-      if (!cameraPermission?.granted) {
-        const res = await requestCameraPermission();
-        if (!res.granted) return;
-      }
-  
-      if (!cameraReady || !cameraRef.current) {
-        Alert.alert('Camera not ready yet, try again.');
-        return;
-      }
-  
-      try {
-        const photo = await cameraRef.current.takePictureAsync({
-          quality: 0.85,
-          skipProcessing: true,
+        const userName = SecureStore.getItemAsync('username').then((name) => {
+            if (name) {
+                console.log("User name found:", name);
+            } else {
+                console.log("No user name found, routing to login.");
+                router.push('/login');
+            }
         });
-  
-        if (photo) {
-          setPhotoUri(photo.uri);
-          console.log('Captured:', photo.uri);
-        }
-      } catch (e) {
-        console.error('Capture failed', e);
-      }
-    }
 
-  return (
-    <GestureHandlerRootView>
-      <GestureDetector gesture={panGesture}>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <CameraView
-                  ref={cameraRef}
-                  style={styles.hiddenCamera}
-                  facing="back"
-                  onCameraReady={() => setCameraReady(true)}
-          />
-          
-          <CameraButton onPressedCallback={handleCapture} />
+        const password = SecureStore.getItemAsync('password').then((pass) => {
+            if (pass) {
+                console.log("Password found.");
+            } else {
+                console.log("No password found, routing to login.");
+                router.push('/login');
+            }
+        });
+
+        // Wait until root layout is ready and text ref is set before routing to main
+        if (text.current) {
+            Promise.all([userName, password]).then(() => {
+                console.log("Routing to main screen.");
+                router.push('/main');
+            });
+        } else {
+            console.warn("Text ref not set yet, cannot route to main screen.");
+        }
+
+
+    }, []);
+
+    useEffect(() => {
+        processLoading();
+    }, [])
+
+    return (
+        <View style={styles.container}>
+            <CameraButton onPressedCallback={() => {}}></CameraButton>
+            <Text style={styles.loadingText} ref={text}>
+                Loading
+            </Text>
         </View>
-      </GestureDetector>
-    </GestureHandlerRootView>
-  );
+    )
 }
 
 const styles = StyleSheet.create({
-  hiddenCamera: {
-      ...StyleSheet.absoluteFillObject,
-  },
-});
+    container: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    loadingText: {
+        fontSize: 32,
+        marginTop: 300
+    }
+})
