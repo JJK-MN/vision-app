@@ -6,12 +6,28 @@ export default function login() {
     const [userName, setUserName] = React.useState("");
     const [password, setPassword] = React.useState("");
 
-    const login = () => {
+    const login = async () => {
         const user = userName;
         const pass = password;
 
         // Send credentials to server and await response
-        
+        const token = await sendLoginRequest();
+    };
+
+    const sendLoginRequest = async () => {
+        const response = await fetch("http://localhost:5000/login", {
+            method: "POST",
+            headers: {
+            "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                username: userName,
+                password: password
+            }),
+        });
+
+        const data = await response.json();
+        console.log(data);
     };
 
     return (
