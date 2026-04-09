@@ -1,5 +1,15 @@
 import { Stack } from "expo-router";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-export default function RootLayout() {
-  return <Stack screenOptions={{ headerShown: false }} />;
+export default function Layout() {
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Stack initialRouteName="index">
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="main" options={{ headerShown: false, gestureEnabled: true }} />
+        <Stack.Screen name="login" options={{ headerShown: false, gestureEnabled: true }} />
+        <Stack.Screen name="settings" options={{ headerShown: false, gestureEnabled: true }} />
+      </Stack>
+    </GestureHandlerRootView>
+  );
 }
