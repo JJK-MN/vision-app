@@ -22,6 +22,7 @@ export default function loading() {
             }
         });
 
+        /*
         const password = SecureStore.getItemAsync('password').then((pass) => {
             if (pass) {
                 console.log("Password found.");
@@ -30,16 +31,19 @@ export default function loading() {
                 router.push('/login');
             }
         });
+            */
 
+        /*
         // Wait until root layout is ready and text ref is set before routing to main
         if (text.current) {
             Promise.all([userName, password]).then(() => {
                 console.log("Routing to main screen.");
-                router.push('/main');
+                router.push('/login');
             });
         } else {
             console.warn("Text ref not set yet, cannot route to main screen.");
         }
+        */
 
 
     }, []);
