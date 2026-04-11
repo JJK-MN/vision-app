@@ -1,10 +1,12 @@
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useRouter } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import React from "react";
 import { Alert, StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { runOnJS } from "react-native-worklets";
 import CameraButton from "../components/CameraButton";
+import { generateResponse } from '../utils/API';
 
 export default function main() {
 
@@ -46,12 +48,12 @@ export default function main() {
         const photo = await cameraRef.current.takePictureAsync({
           quality: 0.85,
           skipProcessing: true,
+        }).then(async (result) => {
+          // Send photo to server.
+          const token = await SecureStore.getItemAsync('userToken');
+          const response = await generateResponse(token, result.uri, "What's in this picture?");
+          console.log('Server response:', response);
         });
-  
-        if (photo) {
-          setPhotoUri(photo.uri);
-          console.log('Captured:', photo.uri);
-        }
       } catch (e) {
         console.error('Capture failed', e);
       }
