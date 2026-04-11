@@ -1,12 +1,12 @@
 import * as SecureStore from 'expo-secure-store';
 import React from "react";
-import { Alert, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Image, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 export default function login() {
 
     const [userName, setUserName] = React.useState("");
     const [password, setPassword] = React.useState("");
-    const [search, setSearch] = React.useState("");
+    const logo = require('../assets/images/logo.png');
 
     const login = async () => {
         try {
@@ -55,12 +55,13 @@ export default function login() {
                 <Text style={styles.signInText}>
                     Sign in to continue
                 </Text>
+                <Image source={logo} style={styles.logo} />
                 <Text style={styles.inputTitle}>
                     Email
                 </Text>
-                <View style={styles.searchInputBar}>
+                <View style={styles.userInputBar}>
                     <TextInput
-                        style={styles.searchInput}
+                        style={styles.userInput}
                         placeholder="you@example.com"
                         placeholderTextColor="#999"
                         value={userName}
@@ -70,9 +71,9 @@ export default function login() {
                 <Text style={styles.inputTitle}>
                     Password
                 </Text>
-                <View style={styles.searchInputBar}>
+                <View style={styles.userInputBar}>
                     <TextInput
-                        style={styles.searchInput}
+                        style={styles.userInput}
                         placeholder="Enter your password"
                         placeholderTextColor="#999"
                         value={password}
@@ -122,13 +123,13 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginBottom: 10,
     },
-    searchInput: {
+    userInput: {
         fontSize: 16,
         color: '#333',
         paddingTop: 10,
         paddingBottom: 10,
     },
-    searchInputBar: {
+    userInputBar: {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#e2dedeff',
@@ -162,5 +163,11 @@ const styles = StyleSheet.create({
         color: '#666',
         textAlign: 'center',
         marginTop: 20,
+    },
+    logo: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        marginRight: 12,
     },
 });
