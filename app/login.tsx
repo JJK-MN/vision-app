@@ -1,11 +1,14 @@
+import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import React from "react";
 import { Alert, Image, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+
 
 export default function login() {
 
     const [userName, setUserName] = React.useState("");
     const [password, setPassword] = React.useState("");
+    const [showPassword, setShowPassword] = React.useState(false);
     const logo = require('../assets/images/logo.png');
 
     const login = async () => {
@@ -49,13 +52,13 @@ export default function login() {
             <View style={styles.header}>
             </View>
             <View style={styles.body}>
+                <Image source={logo} style={styles.logo} />
                 <Text style={styles.welcomeText}>
                     Welcome back!
                 </Text>
-                <Text style={styles.signInText}>
+                <Text style={styles.descriptionText}>
                     Sign in to continue
                 </Text>
-                <Image source={logo} style={styles.logo} />
                 <Text style={styles.inputTitle}>
                     Email
                 </Text>
@@ -78,15 +81,28 @@ export default function login() {
                         placeholderTextColor="#999"
                         value={password}
                         onChangeText={setPassword}
-                        secureTextEntry={true}
+                        secureTextEntry={!showPassword}
                     />
+                    <Pressable onPress={() => setShowPassword(prev => !prev)}>
+                        <Ionicons
+                            name={showPassword ? "eye" : "eye-off"}
+                            size={20}
+                            color="#999"
+                        />
+                    </Pressable>
                 </View>
+                <Text style={styles.forgotPasswordText} onPress={() => { console.log('Forgot Password Pressed'); }} >
+                    Forgot password?
+                </Text>
                 <Pressable style={styles.signInButton} onPress={login}>
                     <Text style={styles.signInButtonText}>Sign In</Text>
                 </Pressable>
-                <Text style={styles.noAccountText}>
-                    Don't have an account? Sign up
+                <View style={styles.footer}>
+                    <Text style={styles.noAccountText}>
+                    Don't have an account? 
+                    <Text style={styles.signUpText} onPress={() => { console.log('Sign Up Pressed'); }} > Sign Up</Text>
                 </Text>
+                </View>
             </View>
         </View>
     )
@@ -97,7 +113,8 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     header: {
-        padding: 20,
+        paddingVertical: 40,
+        backgroundColor: "#fff",
     },
     body: {
         backgroundColor: "#fff",
@@ -110,7 +127,7 @@ const styles = StyleSheet.create({
         paddingBottom: 10,
         fontWeight: 'bold',
     },
-    signInText: {
+    descriptionText: {
         fontSize: 18,
         marginBottom: 20,
         color: "#666",
@@ -128,20 +145,28 @@ const styles = StyleSheet.create({
         color: '#333',
         paddingTop: 10,
         paddingBottom: 10,
+        flex: 1,
     },
     userInputBar: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#e2dedeff',
+        backgroundColor: '#D9D9D9',
         borderRadius: 10,
         paddingHorizontal: 16,
         height: 50,
+    },
+    forgotPasswordText: {
+        fontSize: 14,
+        color: '#000',
+        textAlign: 'right',
+        marginVertical: 15,
+        fontWeight: '600',
     },
     signInButton: {
         backgroundColor: '#000',
         padding: 14,
         borderRadius: 15,
-        marginTop: 60,
+        marginTop: 20,
         marginBottom: 20,
         width: '100%',
         height: 55,
@@ -164,10 +189,22 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 20,
     },
+    signUpText: {
+        fontSize: 14,
+        color: '#000',
+        fontWeight: '600',
+    },
     logo: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+        width: 40 * 2,
+        height: 40 * 2,
         marginRight: 12,
+        marginBottom: 20,
+    },
+    footer: {
+        height: 60,
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        paddingBottom: 60,
+        flex : 1,
     },
 });
