@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React from "react";
 import { Alert, Image, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
@@ -10,6 +11,7 @@ export default function login() {
     const [password, setPassword] = React.useState("");
     const [showPassword, setShowPassword] = React.useState(false);
     const logo = require('../assets/images/logo.png');
+    const router = useRouter();
 
     const login = async () => {
         try {
@@ -100,7 +102,7 @@ export default function login() {
                 <View style={styles.footer}>
                     <Text style={styles.noAccountText}>
                     Don't have an account? 
-                    <Text style={styles.signUpText} onPress={() => { console.log('Sign Up Pressed'); }} > Sign Up</Text>
+                    <Text style={styles.signUpText} onPress={() => { router.push('/signup') }} > Sign Up</Text>
                 </Text>
                 </View>
             </View>
