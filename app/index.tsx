@@ -35,7 +35,7 @@ export default function loading() {
         if (text.current) {
             Promise.all([userName, password]).then(() => {
                 console.log("Routing to main screen.");
-                router.push('/main');
+                router.push('/login');
             });
         } else {
             console.warn("Text ref not set yet, cannot route to main screen.");

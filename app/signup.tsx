@@ -2,12 +2,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React from "react";
-import { Alert, Image, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-
+import { Alert, Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { requestUserRegistration } from '../utils/API';
 
 export default function signUpScreen() {
 
     const [fullName, setFullName] = React.useState("");
+    const [userName, setUserName] = React.useState("");
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
     const [confirmPassword, setConfirmPassword] = React.useState("");
@@ -22,40 +23,33 @@ export default function signUpScreen() {
             Alert.alert('Error', 'Passwords do not match');
             return;
         }
+
         try {
-            const token = await sendSignUpRequest();
-            await SecureStore.setItemAsync('username', email);
-            await SecureStore.setItemAsync('password', password);
-            await SecureStore.setItemAsync('token', token['token']);
+            const firstName = fullName.split(' ')[0] || '';
+            const lastName = fullName.split(' ')[1] || '';
+
+            if (firstName.length === 0 || lastName.length === 0) {
+                Alert.alert('Error', 'Please enter both first and last name');
+                return;
+            }
+
+            const success = await requestUserRegistration(userName, password, email, firstName, lastName);
+            
+            if (!success) {
+                Alert.alert('Error', 'Sign up failed');
+                return;
+            } else {
+                console.log('Sign up successful, navigating to login');
+                await SecureStore.setItemAsync('username', userName);
+                await SecureStore.setItemAsync('password', password);
+                router.push('/login');
+            }
         } catch (err: any) {
             console.error('Sign up error', err);
             Alert.alert('Sign up failed', err?.message || 'Network request failed');
         }
     };
 
-    const sendSignUpRequest = async () => {
-        const baseUrl = Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://127.0.0.1:5000';
-        const response = await fetch(`${baseUrl}/signup`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                fullName: fullName,
-                username: email,
-                password: password,
-            }),
-        });
-
-        if (!response.ok) {
-            const text = await response.text().catch(() => '');
-            throw new Error(`Server error: ${response.status} ${text}`);
-        }
-
-        const data = await response.json();
-        console.log(data);
-        return data;
-    };
     return (
         <View style={styles.screen}>
             <View style={styles.header}>
@@ -80,6 +74,20 @@ export default function signUpScreen() {
                         onChangeText={setFullName}
                     />
                 </View>
+
+                <Text style={styles.inputTitle}>
+                    Username
+                </Text>
+                <View style={styles.userInputBar}>
+                    <TextInput
+                        style={styles.userInput}
+                        placeholder="Enter your username"
+                        placeholderTextColor="#999"
+                        value={userName}
+                        onChangeText={setUserName}
+                    />
+                </View>
+
                 <Text style={styles.inputTitle}>
                     Email
                 </Text>
