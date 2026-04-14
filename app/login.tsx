@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React from "react";
-import { Alert, Image, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-
+import { Alert, Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { requestUserAuthentication } from '../utils/API';
 
 export default function login() {
 
@@ -10,42 +11,23 @@ export default function login() {
     const [password, setPassword] = React.useState("");
     const [showPassword, setShowPassword] = React.useState(false);
     const logo = require('../assets/images/logo.png');
+    const router = useRouter();
 
-    const login = async () => {
-        try {
-            const token = await sendLoginRequest();
-            await SecureStore.setItemAsync('username', userName);
-            await SecureStore.setItemAsync('password', password);
-            await SecureStore.setItemAsync('token', token['token']);
-            // TODO: handle token (store, navigate, etc.)
-        } catch (err: any) {
-            console.error('Login error', err);
-            Alert.alert('Login failed', err?.message || 'Network request failed');
-        }
-    };
 
     const sendLoginRequest = async () => {
-        const baseUrl = Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://127.0.0.1:5000';
-        const response = await fetch(`${baseUrl}/login`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                username: userName,
-                password: password
-            }),
-        });
-
-        if (!response.ok) {
-            const text = await response.text().catch(() => '');
-            throw new Error(`Server error: ${response.status} ${text}`);
+        const token = await requestUserAuthentication(userName, password);
+        if (token == null) {
+            Alert.alert('Login failed', 'Invalid username or password');
+            return;
         }
 
-        const data = await response.json();
-        console.log(data);
-        return data;
-    };
+        SecureStore.setItemAsync('username', userName);
+        SecureStore.setItemAsync('password', password);
+        SecureStore.setItemAsync('token', token);
+        console.log('Login successful, navigating to main screen');
+
+        router.push('/main');
+    }
 
     return (
         <View style={styles.screen}>
@@ -60,12 +42,12 @@ export default function login() {
                     Sign in to continue
                 </Text>
                 <Text style={styles.inputTitle}>
-                    Email
+                    Username or Email
                 </Text>
                 <View style={styles.userInputBar}>
                     <TextInput
                         style={styles.userInput}
-                        placeholder="you@example.com"
+                        placeholder="Username or Email"
                         placeholderTextColor="#999"
                         value={userName}
                         onChangeText={setUserName}
@@ -94,13 +76,13 @@ export default function login() {
                 <Text style={styles.forgotPasswordText} onPress={() => { console.log('Forgot Password Pressed'); }} >
                     Forgot password?
                 </Text>
-                <Pressable style={styles.signInButton} onPress={login}>
+                <Pressable style={styles.signInButton} onPress={sendLoginRequest}>
                     <Text style={styles.signInButtonText}>Sign In</Text>
                 </Pressable>
                 <View style={styles.footer}>
                     <Text style={styles.noAccountText}>
                     Don't have an account? 
-                    <Text style={styles.signUpText} onPress={() => { console.log('Sign Up Pressed'); }} > Sign Up</Text>
+                    <Text style={styles.signUpText} onPress={() => { router.push("/signup") }} > Sign Up</Text>
                 </Text>
                 </View>
             </View>
