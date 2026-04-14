@@ -9,11 +9,8 @@ export default function Layout() {
         <Stack.Screen name="main" options={{ headerShown: false, gestureEnabled: true }} />
         <Stack.Screen name="login" options={{ headerShown: false, gestureEnabled: true }} />
         <Stack.Screen name="settings" options={{ headerShown: false, gestureEnabled: true }} />
-<<<<<<< HEAD
-        <Stack.Screen name="profile" options={{ headerShown: false, gestureEnabled: true }} />
-=======
         <Stack.Screen name="signup" options={{ headerShown: false, gestureEnabled: true }} />
->>>>>>> main
+        <Stack.Screen name="profile" options={{ headerShown: false, gestureEnabled: true }} />
       </Stack>
     </GestureHandlerRootView>
   );

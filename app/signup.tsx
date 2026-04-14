@@ -74,7 +74,6 @@ export default function signUpScreen() {
                         onChangeText={setFullName}
                     />
                 </View>
-
                 <Text style={styles.inputTitle}>
                     Username
                 </Text>
@@ -156,7 +155,7 @@ export default function signUpScreen() {
                 </Pressable>
                 <View style={styles.footer}>
                     <Text style={styles.alreadyHaveAccountText}>
-                    Don't have an account? 
+                    Already have an account? 
                     <Text style={styles.logInText} onPress={() => { router.push('/login') }} > Log In</Text>
                 </Text>
                 </View>
@@ -170,32 +169,32 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     header: {
-        paddingVertical: 40,
+        paddingVertical: 30,
         backgroundColor: "#fff",
     },
     body: {
         backgroundColor: "#fff",
-        flex: 1,
         paddingHorizontal: 20,
-        paddingTop: 15,
+        paddingTop: 5,
+        flex: 1,
     },
     welcomeText: {
         fontSize: 35,
-        paddingBottom: 10,
+        paddingBottom: 5,
         fontWeight: 'bold',
     },
     descriptionText: {
         fontSize: 18,
-        marginBottom: 20,
+        marginBottom: 10,
         color: "#666",
         paddingTop: 5,
-        paddingBottom: 20,
+        paddingBottom: 10,
     },
     inputTitle: {
         fontSize: 14,
         color: "#333",
         marginTop: 10,
-        marginBottom: 10,
+        marginBottom: 5,
     },
     userInput: {
         fontSize: 16,
@@ -269,7 +268,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#666',
         textAlign: 'center',
-        marginTop: 20,
+        marginTop: 10,
     },
     logInText: {
         fontSize: 14,
@@ -280,13 +279,13 @@ const styles = StyleSheet.create({
         width: 40 * 2,
         height: 40 * 2,
         marginRight: 12,
-        marginBottom: 20,
+        marginBottom: 10,
     },
     footer: {
-        height: 60,
+        height: 40,
         justifyContent: 'flex-end',
         alignItems: 'center',
-        paddingBottom: 60,
+        paddingBottom: 70,
         flex : 1,
     },
 });
