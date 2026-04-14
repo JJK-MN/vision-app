@@ -73,7 +73,7 @@ export default function SettingsScreen() {
             variant="user"
             label="John Doe"
             description="Profile Settings"
-            onPress={() => console.log('pressed')}
+            onPress={() => router.push('/profile')}
           />
 
           {/* Camera Sensor Section */}

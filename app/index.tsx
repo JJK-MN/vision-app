@@ -18,10 +18,10 @@ export default function loading() {
                 console.log("User name found:", name);
             } else {
                 console.log("No user name found, routing to login.");
-                router.push('/login');
+                router.push('/profile');
             }
         });
-
+/*
         const password = SecureStore.getItemAsync('password').then((pass) => {
             if (pass) {
                 console.log("Password found.");
@@ -40,7 +40,7 @@ export default function loading() {
         } else {
             console.warn("Text ref not set yet, cannot route to main screen.");
         }
-
+*/
 
     }, []);
 
