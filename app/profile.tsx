@@ -3,11 +3,18 @@ import * as SecureStore from 'expo-secure-store';
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Avatar from '../components/Avatar';
 
 export default function profileScreen() {
   const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [imageUri, setImageUri] = React.useState<string | null>(null);
   const router = useRouter();
+
+  const handleImageChange = async (uri: string) => {
+    setImageUri(uri);
+    await SecureStore.setItemAsync('profileImage', uri); // ✅ persists the image
+  };
 
   const swipeRight = Gesture.Pan()
     .runOnJS(true)
@@ -20,6 +27,16 @@ export default function profileScreen() {
       }
     });
 
+    React.useEffect(() => {
+    const load = async () => {
+      const name = await SecureStore.getItemAsync('username');
+      const img = await SecureStore.getItemAsync('profileImage');
+      if (name) setUsername(name);
+      if (img) setImageUri(img);
+    };
+    load();
+
+  }, []);
     React.useEffect(() => {
     const loadUsername = async () => {
       const stored = await SecureStore.getItemAsync('username');
@@ -34,6 +51,14 @@ export default function profileScreen() {
 
         {/* Header */}
         <View style={styles.header}>
+          <View>
+            <Avatar
+              name={username}
+              imageUri={imageUri}
+              size={80}
+              onImageChange={handleImageChange}
+            />
+          </View>
         </View>
         <ScrollView style={styles.body}>
           <Text style={styles.nameText}>John Doe</Text>
