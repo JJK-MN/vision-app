@@ -27,7 +27,7 @@ export default function profileScreen() {
       }
     });
 
-    React.useEffect(() => {
+  React.useEffect(() => {
     const load = async () => {
       const name = await SecureStore.getItemAsync('username');
       const img = await SecureStore.getItemAsync('profileImage');
@@ -37,13 +37,21 @@ export default function profileScreen() {
     load();
 
   }, []);
-    React.useEffect(() => {
+
+  React.useEffect(() => {
     const loadUsername = async () => {
       const stored = await SecureStore.getItemAsync('username');
       if (stored) setUsername(stored);
     };
     loadUsername();
   }, []);
+
+  const handleLogOut = async () => {
+    await SecureStore.deleteItemAsync('username');
+    await SecureStore.deleteItemAsync('password');
+    await SecureStore.deleteItemAsync('token');
+    router.push('/login');
+  }
 
   return (
     <GestureDetector gesture={swipeRight}>
@@ -83,7 +91,7 @@ export default function profileScreen() {
                 <Text style={styles.infoTitle}>Change Password</Text>
             </View>
         </Pressable>
-        <Pressable onPress={() => router.push('/login')}>
+        <Pressable onPress={handleLogOut}>
             <View style={styles.logOutButtonContainer}>
                 <Text style={styles.logOutButtonText}>Log Out</Text>
             </View>

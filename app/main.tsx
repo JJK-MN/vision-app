@@ -15,6 +15,12 @@ export default function main() {
   const [cameraReady, setCameraReady] = React.useState(false);
   const [photoUri, setPhotoUri] = React.useState<string | null>(null);
 
+  React.useEffect(() => {
+    if (cameraPermission && !cameraPermission.granted && cameraPermission.canAskAgain) {
+      requestCameraPermission();
+    }
+  }, [cameraPermission]);
+
   const navigateSettings = React.useCallback(() => {
       router.push('/settings');
     }, [router]);
@@ -58,7 +64,7 @@ export default function main() {
     }
 
   return (
-    <GestureHandlerRootView>
+    <GestureHandlerRootView style={{ flex : 1 }}>
       <GestureDetector gesture={panGesture}>
         <View
           style={{
@@ -67,12 +73,14 @@ export default function main() {
             alignItems: "center",
           }}
         >
-          <CameraView
-                  ref={cameraRef}
-                  style={styles.hiddenCamera}
-                  facing="back"
-                  onCameraReady={() => setCameraReady(true)}
-          />
+          {cameraPermission?.granted ? (
+            <CameraView
+              ref={cameraRef}
+              style={styles.hiddenCamera}
+              facing="back"
+              onCameraReady={() => setCameraReady(true)}
+            />
+          ) : null}
           
           <CameraButton onPressedCallback={handleCapture} />
         </View>

@@ -11,36 +11,26 @@ export default function loading() {
     const router = useRouter();
 
     const processLoading = React.useCallback(() => {
-        console.log("First communicating with server...");
+        console.log("Verifying credentials...");
 
-        const userName = SecureStore.getItemAsync('username').then((name) => {
-            if (name) {
-                console.log("User name found:", name);
-            } else {
-                console.log("No user name found, routing to login.");
-                router.push('/profile');
-            }
-        });
-/*
-        const password = SecureStore.getItemAsync('password').then((pass) => {
-            if (pass) {
-                console.log("Password found.");
-            } else {
-                console.log("No password found, routing to login.");
-                router.push('/login');
-            }
-        });
+        const userName = SecureStore.getItemAsync('username');
+        const password = SecureStore.getItemAsync('password');
 
         // Wait until root layout is ready and text ref is set before routing to main
         if (text.current) {
-            Promise.all([userName, password]).then(() => {
+            Promise.all([userName, password]).then(async ([resolvedUserName, resolvedPassword]) => {
+                if (resolvedUserName == null || resolvedPassword == null) {
+                    console.log("No credentials found, routing to login screen.");
+                    await router.push('/login');
+                    return;
+                }
+                    
                 console.log("Routing to main screen.");
-                router.push('/main');
+                await router.push('/main');
             });
         } else {
             console.warn("Text ref not set yet, cannot route to main screen.");
         }
-*/
 
     }, []);
 

@@ -15,6 +15,12 @@ export default function login() {
 
 
     const sendLoginRequest = async () => {
+
+        if (userName.trim() === "" || password.trim() === "") {
+            Alert.alert('Error', 'Please enter both username and password');
+            return;
+        }
+
         const token = await requestUserAuthentication(userName, password);
         if (token == null) {
             Alert.alert('Login failed', 'Invalid username or password');

@@ -1,7 +1,15 @@
 import { Platform } from 'react-native';
 
+const DEBUG = true;
+
 export const requestUserAuthentication = async (userName, password) => {
     const baseUrl = Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://127.0.0.1:5000';
+    
+    if (DEBUG) {
+        console.log("DEBUG MODE: Skipping authentication and returning dummy token.");
+        return "dummy-token";
+    }
+    
     const response = await fetch(`${baseUrl}/login`, {
         method: "POST",
         headers: {

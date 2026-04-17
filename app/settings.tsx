@@ -17,7 +17,7 @@ export default function SettingsScreen() {
     .onEnd((e) => {
       if (e.translationX > 50 && Math.abs(e.translationY) < 80) {
         console.log('Swiped right, going back');
-        router.push('/');
+        router.push('/main');
       }
     });
 
