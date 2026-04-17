@@ -45,12 +45,14 @@ export default function main() {
       }
   
       try {
-        const photo = await cameraRef.current.takePictureAsync({
+        await cameraRef.current.takePictureAsync({
           quality: 0.85,
           skipProcessing: true,
         }).then(async (result) => {
           // Send photo to server.
           const token = await SecureStore.getItemAsync('userToken');
+
+          // TODO: replace context string with actual question input from user
           const response = await generateResponse(token, result.uri, "What's in this picture?");
           console.log('Server response:', response);
         });
