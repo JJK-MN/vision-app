@@ -15,7 +15,8 @@ export const requestUserAuthentication = async (userName, password) => {
 
     if (!response.ok) {
         const text = await response.text().catch(() => '');
-        throw new Error(`Server error: ${response.status} ${text}`);
+        console.error(`Authentication failed: ${response.status} ${text}`);
+        return null;
     }
 
     const data = await response.json();
@@ -59,10 +60,37 @@ export const generateResponse = async (token, photoUri, message) => {
 
     if (!response.ok) {
         const text = await response.text().catch(() => '');
-        throw new Error(`Server error: ${response.status} ${text}`);
+        console.error(`Server error: ${response.status} ${text}`);
+        return null;
     }
 
     const data = await response.json();
     return data;
 };
 
+export const requestUserRegistration = async (userName, password, email, firstName, lastName) => {
+    // For Android emulator, use. Will need to change to actual server IP if testing on real device.
+    const baseUrl = Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://127.0.0.1:5000';
+    
+    const response = await fetch(`${baseUrl}/create_user`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            username: userName,
+            password: password,
+            email: email,
+            firstName: firstName,
+            lastName: lastName
+        }),
+    });
+
+    if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        console.error(`Registration failed: ${response.status} ${text}`);
+        return false;
+    }
+
+    return true;
+};
